@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAI 태그 모음</title>
+    <title>NAI 태그 저장소</title>
     <style>
         :root {
             --bg-color: #1e1e1e;
@@ -26,15 +26,20 @@
         .container {
             max-width: 600px;
             width: 100%;
-            background-color: var(--bg-color);
         }
 
-        h1 {
-            font-size: 1.5rem;
+        /* 노션 스타일 제목 생성 */
+        .editable-title {
+            font-size: 1.6rem;
+            font-weight: bold;
             color: #ffffff;
             margin-bottom: 25px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
+            outline: none;
+        }
+        .editable-title:focus {
+            border-bottom: 1px solid #666;
         }
 
         .section {
@@ -50,36 +55,46 @@
             border-left: 4px solid #ffffff;
         }
 
-        /* 프롬프트 박스 스타일 */
-        .prompt-box {
+        /* 프롬프트 입력/복사 상자 */
+        .prompt-container {
             position: relative;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             padding: 15px;
+            padding-top: 35px; /* 버튼 공간 확보 */
+        }
+
+        .editable-prompt {
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9rem;
             line-height: 1.5;
             word-break: break-all;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            outline: none;
+            white-space: pre-wrap;
+            min-height: 40px;
+            color: #e5c07b; /* 프롬프트는 가독성 좋은 색상으로 */
         }
 
-        .prompt-box:hover {
-            background-color: #2d2d2d;
-        }
-
-        .prompt-box::after {
-            content: '클릭하여 복사';
+        .copy-btn {
             position: absolute;
-            top: 5px;
-            right: 10px;
+            top: 8px;
+            right: 8px;
+            background-color: #333;
+            color: #aaa;
+            border: 1px solid #444;
+            padding: 3px 8px;
             font-size: 0.75rem;
-            color: #666;
+            border-radius: 3px;
+            cursor: pointer;
             font-family: 'Noto Sans KR', sans-serif;
         }
+        .copy-btn:hover {
+            background-color: #444;
+            color: #fff;
+        }
 
-        /* 이미지 업로드 및 그리드 스타일 */
+        /* 이미지 그리드 및 로컬 업로드 */
         .image-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -97,14 +112,213 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+        }
+        .image-wrapper:hover {
+            border-color: #888;
         }
 
         .image-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
+        .upload-placeholder {
+            color: #666;
+            font-size: 0.85rem;
+            text-align: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* 안내 문구 */
+        .notice {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px dashed #333;
+            padding-top: 15px;
+        }
+
+        /* 토스트 알림 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 대제목 (수정 가능) -->
+        <div class="editable-title" id="main-title" contenteditable="true" oninput="saveText('main-title')">Nai 4.5 저장소 (클릭하여 제목 수정)</div>
+
+        <!-- 테스트 프롬프트 -->
+        <div class="section">
+            <div class="section-title">테스트</div>
+            <div class="prompt-container">
+                <button class="copy-btn" onclick="copyPrompt('prompt-test')">복사</button>
+                <div class="editable-prompt" id="prompt-test" contenteditable="true" oninput="saveText('prompt-test')">여기를 눌러 프롬프트를 입력하세요...</div>
+            </div>
+        </div>
+
+        <!-- 기본 프롬프트 -->
+        <div class="section">
+            <div class="section-title">기본</div>
+            <div class="prompt-container">
+                <button class="copy-btn" onclick="copyPrompt('prompt-base')">복사</button>
+                <div class="editable-prompt" id="prompt-base" contenteditable="true" oninput="saveText('prompt-base')">여기를 눌러 기본 프롬프트를 입력하세요...</div>
+            </div>
+        </div>
+
+        <!-- 네거티브 프롬프트 -->
+        <div class="section">
+            <div class="section-title">네거</div>
+            <div class="prompt-container">
+                <button class="copy-btn" onclick="copyPrompt('prompt-nega')">복사</button>
+                <div class="editable-prompt" id="prompt-nega" contenteditable="true" oninput="saveText('prompt-nega')">여기를 눌러 네거티브 프롬프트를 입력하세요...</div>
+            </div>
+        </div>
+
+        <!-- boy 결과물 이미지 2장 -->
+        <div class="section">
+            <div class="section-title">boy</div>
+            <div class="image-grid">
+                <div class="image-wrapper" onclick="triggerUpload('img-boy-1')">
+                    <div class="upload-placeholder" id="placeholder-img-boy-1">클릭하여 이미지 업로드</div>
+                    <img id="img-boy-1" src="" alt="" style="display:none;">
+                    <input type="file" id="input-img-boy-1" class="file-input" accept="image/*" onchange="loadImage(event, 'img-boy-1')">
+                </div>
+                <div class="image-wrapper" onclick="triggerUpload('img-boy-2')">
+                    <div class="upload-placeholder" id="placeholder-img-boy-2">클릭하여 이미지 업로드</div>
+                    <img id="img-boy-2" src="" alt="" style="display:none;">
+                    <input type="file" id="input-img-boy-2" class="file-input" accept="image/*" onchange="loadImage(event, 'img-boy-2')">
+                </div>
+            </div>
+        </div>
+
+        <!-- girl 결과물 이미지 2장 -->
+        <div class="section">
+            <div class="section-title">girl</div>
+            <div class="image-grid">
+                <div class="image-wrapper" onclick="triggerUpload('img-girl-1')">
+                    <div class="upload-placeholder" id="placeholder-img-girl-1">클릭하여 이미지 업로드</div>
+                    <img id="img-girl-1" src="" alt="" style="display:none;">
+                    <input type="file" id="input-img-girl-1" class="file-input" accept="image/*" onchange="loadImage(event, 'img-girl-1')">
+                </div>
+                <div class="image-wrapper" onclick="triggerUpload('img-girl-2')">
+                    <div class="upload-placeholder" id="placeholder-img-girl-2">클릭하여 이미지 업로드</div>
+                    <img id="img-girl-2" src="" alt="" style="display:none;">
+                    <input type="file" id="input-img-girl-2" class="file-input" accept="image/*" onchange="loadImage(event, 'img-girl-2')">
+                </div>
+            </div>
+        </div>
+
+        <div class="notice">
+            💡 모든 변경사항은 브라우저에 자동 저장됩니다. (깃허브 코드가 직접 바뀌지 않아도 유지됨)
+        </div>
+    </div>
+
+    <!-- 토스트 알림 팝업 -->
+    <div class="toast" id="toast">복사 완료!</div>
+
+    <script>
+        // 페이지 로드 시 기존에 저장된 데이터 불러오기
+        window.onload = function() {
+            const fields = ['main-title', 'prompt-test', 'prompt-base', 'prompt-nega'];
+            fields.forEach(id => {
+                const savedValue = localStorage.getItem(id);
+                if (savedValue) {
+                    document.getElementById(id).innerText = savedValue;
+                }
+            });
+
+            const imgs = ['img-boy-1', 'img-boy-2', 'img-girl-1', 'img-girl-2'];
+            imgs.forEach(id => {
+                const savedImg = localStorage.getItem(id);
+                if (savedImg) {
+                    const imgTag = document.getElementById(id);
+                    imgTag.src = savedImg;
+                    imgTag.style.display = 'block';
+                    document.getElementById('placeholder-' + id).style.display = 'none';
+                }
+            });
+        };
+
+        // 텍스트 자동 저장
+        function saveText(id) {
+            const text = document.getElementById(id).innerText;
+            localStorage.setItem(id, text);
+        }
+
+        // 파일 업로드 창 띄우기
+        function triggerUpload(id) {
+            document.getElementById('input-' + id).click();
+        }
+
+        // 이미지 불러오기 및 로컬 저장
+        function loadImage(event, id) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgTag = document.getElementById(id);
+                    imgTag.src = e.target.result;
+                    imgTag.style.display = 'block';
+                    document.getElementById('placeholder-' + id).style.display = 'none';
+                    
+                    // 용량 한계가 있으므로 이미지를 최적화하여 localStorage에 저장 (또는 브라우저 세션 보관)
+                    try {
+                        localStorage.setItem(id, e.target.result);
+                    } catch (error) {
+                        alert("이미지 용량이 너무 커서 자동 저장에 실패했습니다. 가급적 작은 용량의 이미지나 캡처본을 사용해 주세요!");
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 프롬프트 복사 기능
+        function copyPrompt(id) {
+            const text = document.getElementById(id).innerText;
+            
+            // 기본 안내 문구일 때는 복사하지 않음
+            if (text.includes("여기를 눌러") && text.includes("입력하세요")) return;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(-50%) translateY(-5px)';
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(-50%) translateY(0)';
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>
         .upload-btn {
             cursor: pointer;
             color: #888;

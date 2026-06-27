@@ -3,108 +3,411 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAI 태그 저장소</title>
+    <title>NAI 태그 아카이브</title>
     <style>
         :root {
-            --bg-color: #1e1e1e;
-            --card-bg: #252525;
-            --text-color: #d4d4d4;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --input-bg: #252525;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
             --accent-color: #4CAF50;
-            --border-color: #333;
+            --danger-color: #cf6679;
+            --border-color: #2d2d2d;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Noto Sans KR', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
-            max-width: 600px;
             width: 100%;
+            max-width: 600px;
         }
 
-        /* 노션 스타일 제목 생성 */
+        /* 상단 컨트롤 영역 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 1.4rem;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .add-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 개별 포스트 카드 스타일 */
+        .post-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 10px;
+        }
+
         .editable-title {
-            font-size: 1.6rem;
+            font-size: 1.25rem;
             font-weight: bold;
             color: #ffffff;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
             outline: none;
+            flex: 1;
+            margin-right: 10px;
         }
-        .editable-title:focus {
-            border-bottom: 1px solid #666;
+        .editable-title:empty:before {
+            content: "여기를 눌러 제목 입력 (예: Nai 4.5 Full)";
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
         .section {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .section-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             color: #ffffff;
-            margin-bottom: 10px;
-            padding-left: 10px;
-            border-left: 4px solid #ffffff;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 3px solid #ffffff;
         }
 
-        /* 프롬프트 입력/복사 상자 */
+        /* 프롬프트 박스 */
         .prompt-container {
             position: relative;
-            background-color: var(--card-bg);
+            background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            padding: 15px;
-            padding-top: 35px; /* 버튼 공간 확보 */
+            padding: 12px;
+            padding-top: 35px;
         }
 
         .editable-prompt {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.85rem;
+            line-height: 1.4;
             word-break: break-all;
             outline: none;
             white-space: pre-wrap;
-            min-height: 40px;
-            color: #e5c07b; /* 프롬프트는 가독성 좋은 색상으로 */
+            min-height: 30px;
+            color: #e5c07b;
+        }
+        .editable-prompt:empty:before {
+            content: "터치하여 프롬프트 입력...";
+            color: #5c6370;
         }
 
         .copy-btn {
             position: absolute;
-            top: 8px;
-            right: 8px;
+            top: 6px;
+            right: 6px;
             background-color: #333;
             color: #aaa;
             border: 1px solid #444;
-            padding: 3px 8px;
-            font-size: 0.75rem;
+            padding: 2px 6px;
+            font-size: 0.7rem;
             border-radius: 3px;
             cursor: pointer;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-        .copy-btn:hover {
-            background-color: #444;
-            color: #fff;
         }
 
-        /* 이미지 그리드 및 로컬 업로드 */
+        /* 이미지 그리드 */
         .image-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
         }
 
         .image-wrapper {
             position: relative;
             aspect-ratio: 3 / 4;
+            background-color: var(--input-bg);
+            border: 1px dashed #444;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .upload-placeholder {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .file-input { display: none; }
+
+        /* 토스트 알림 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>NAI 태그 보관함</h1>
+            <button class="add-btn" onclick="createNewPost()">+ 새 세트 추가</button>
+        </div>
+
+        <!-- 카드들이 생성될 컨테이너 -->
+        <div id="post-list"></div>
+    </div>
+
+    <div class="toast" id="toast">복사 완료!</div>
+
+    <script>
+        // 전체 데이터 배열
+        let itemArray = [];
+
+        // 로드 시 실행
+        window.onload = function() {
+            const savedData = localStorage.getItem('nai_archive_data');
+            if (savedData) {
+                itemArray = JSON.parse(savedData);
+                renderPosts();
+            } else {
+                // 데이터가 아예 없을 때 기본 샘플 1개 생성
+                createNewPost();
+            }
+        };
+
+        // 데이터 저장하기
+        function saveAllData() {
+            localStorage.setItem('nai_archive_data', JSON.stringify(itemArray));
+        }
+
+        // 새 세트 데이터 추가 생성
+        function createNewPost() {
+            const newPost = {
+                id: Date.now(),
+                title: '',
+                test: '',
+                base: '',
+                nega: '',
+                img_boy_1: '',
+                img_boy_2: '',
+                img_girl_1: '',
+                img_girl_2: ''
+            };
+            itemArray.unshift(newPost); // 최신 글이 맨 위로 오게 함
+            saveAllData();
+            renderPosts();
+        }
+
+        // 포스트 삭제
+        function deletePost(id) {
+            if (confirm("이 태그 세트를 정말 삭제할까요?")) {
+                itemArray = itemArray.filter(item => item.id !== id);
+                saveAllData();
+                renderPosts();
+            }
+        }
+
+        // 텍스트 변경 감지 및 저장
+        function onTextChange(id, field, element) {
+            const index = itemArray.findIndex(item => item.id === id);
+            if (index !== -1) {
+                itemArray[index][field] = element.innerText;
+                saveAllData();
+            }
+        }
+
+        // 이미지 파일 업로드 유도
+        function triggerUpload(postId, imgField) {
+            document.getElementById(`input-${postId}-${imgField}`).click();
+        }
+
+        // 이미지 파일 로드 및 압축 저장
+        function handleImageUpload(event, postId, imgField) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgResult = e.target.result;
+                    
+                    // 이미지 압축을 위해 임시 Image 객체 생성 (localStorage 용량 제한 대응)
+                    const img = new Image();
+                    img.src = imgResult;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // 최대 가로폭 400px 기준으로 리사이징
+                        const maxW = 400;
+                        const scale = maxW / img.width;
+                        canvas.width = maxW;
+                        canvas.height = img.height * scale;
+                        
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7); // 70% 품질로 압축
+                        
+                        // 데이터 반영
+                        const index = itemArray.findIndex(item => item.id === postId);
+                        if (index !== -1) {
+                            itemArray[index][imgField] = compressedDataUrl;
+                            saveAllData();
+                            renderPosts();
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 복사 기능
+        function copyText(postId, field) {
+            const item = itemArray.find(item => item.id === postId);
+            if (item && item[field]) {
+                navigator.clipboard.writeText(item[field]).then(() => {
+                    const toast = document.getElementById('toast');
+                    toast.style.opacity = '1';
+                    setTimeout(() => { toast.style.opacity = '0'; }, 1200);
+                });
+            }
+        }
+
+        // 전체 포스트 화면 렌더링
+        function renderPosts() {
+            const listContainer = document.getElementById('post-list');
+            listContainer.innerHTML = '';
+
+            itemArray.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div class="editable-title" contenteditable="true" oninput="onTextChange(${item.id}, 'title', this)">${item.title}</div>
+                        <button class="delete-btn" onclick="deletePost(${item.id})">삭제</button>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">테스트</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText(${item.id}, 'test')">복사</button>
+                            <div class="editable-prompt" contenteditable="true" oninput="onTextChange(${item.id}, 'test', this)">${item.test}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">기본</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText(${item.id}, 'base')">복사</button>
+                            <div class="editable-prompt" contenteditable="true" oninput="onTextChange(${item.id}, 'base', this)">${item.base}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">네거</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText(${item.id}, 'nega')">복사</button>
+                            <div class="editable-prompt" contenteditable="true" oninput="onTextChange(${item.id}, 'nega', this)">${item.nega}</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">boy</div>
+                        <div class="image-grid">
+                            <div class="image-wrapper" onclick="triggerUpload(${item.id}, 'img-boy-1')">
+                                ${item.img_boy_1 ? `<img src="${item.img_boy_1}">` : `<div class="upload-placeholder">이미지 업로드</div>`}
+                                <input type="file" id="input-${item.id}-img-boy-1" class="file-input" accept="image/*" onchange="handleImageUpload(event, ${item.id}, 'img-boy-1')">
+                            </div>
+                            <div class="image-wrapper" onclick="triggerUpload(${item.id}, 'img-boy-2')">
+                                ${item.img_boy_2 ? `<img src="${item.img_boy_2}">` : `<div class="upload-placeholder">이미지 업로드</div>`}
+                                <input type="file" id="input-${item.id}-img-boy-2" class="file-input" accept="image/*" onchange="handleImageUpload(event, ${item.id}, 'img-boy-2')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">girl</div>
+                        <div class="image-grid">
+                            <div class="image-wrapper" onclick="triggerUpload(${item.id}, 'img-girl-1')">
+                                ${item.img_girl_1 ? `<img src="${item.img_girl_1}">` : `<div class="upload-placeholder">이미지 업로드</div>`}
+                                <input type="file" id="input-${item.id}-img-girl-1" class="file-input" accept="image/*" onchange="handleImageUpload(event, ${item.id}, 'img-girl-1')">
+                            </div>
+                            <div class="image-wrapper" onclick="triggerUpload(${item.id}, 'img-girl-2')">
+                                ${item.img_girl_2 ? `<img src="${item.img_girl_2}">` : `<div class="upload-placeholder">이미지 업로드</div>`}
+                                <input type="file" id="input-${item.id}-img-girl-2" class="file-input" accept="image/*" onchange="handleImageUpload(event, ${item.id}, 'img-girl-2')">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
             background-color: var(--card-bg);
             border: 1px dashed #555;
             border-radius: 4px;

@@ -34,7 +34,6 @@
             max-width: 600px;
         }
 
-        /* 상단 컨트롤 영역 */
         .header {
             display: flex;
             justify-content: space-between;
@@ -45,7 +44,7 @@
         }
 
         .header h1 {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             margin: 0;
             color: #ffffff;
         }
@@ -61,50 +60,340 @@
             font-weight: bold;
         }
 
-        /* 개별 포스트 카드 스타일 */
-        .post-card {
+        /* 인스타그램 스타일 메인 그리드/피드 */
+        .feed-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .feed-item {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feed-img-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: var(--input-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feed-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .feed-no-img {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .feed-title {
+            padding: 10px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        /* 팝업(모달) 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
             padding: 15px;
-            margin-bottom: 30px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 20px;
             position: relative;
         }
 
-        .post-header {
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 10px;
+            padding-bottom: 12px;
         }
 
         .editable-title {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #ffffff;
             outline: none;
             flex: 1;
-            margin-right: 10px;
+            margin-right: 15px;
+            border-bottom: 1px solid transparent;
+        }
+        .editable-title:focus {
+            border-bottom: 1px solid #555;
         }
         .editable-title:empty:before {
-            content: "여기를 눌러 제목 입력 (예: Nai 4.5 Full)";
+            content: "여기를 눌러 제목 입력...";
             color: var(--text-muted);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 5px;
         }
 
         .delete-btn {
             background-color: transparent;
             color: var(--danger-color);
             border: 1px solid var(--danger-color);
-            padding: 4px 8px;
-            font-size: 0.75rem;
+            padding: 5px 10px;
+            font-size: 0.8rem;
             border-radius: 4px;
             cursor: pointer;
+            margin-right: 10px;
         }
 
         .section {
             margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 3px solid #ffffff;
+        }
+
+        /* 프롬프트 박스 */
+        .prompt-container {
+            position: relative;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            padding-top: 35px;
+        }
+
+        .editable-prompt {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            word-break: break-all;
+            outline: none;
+            white-space: pre-wrap;
+            min-height: 30px;
+            color: #e5c07b;
+        }
+        .editable-prompt:empty:before {
+            content: "터치하여 프롬프트 입력...";
+            color: #5c6370;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background-color: #333;
+            color: #aaa;
+            border: 1px solid #444;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* 이미지 그리드 */
+        .image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .image-wrapper {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            background-color: var(--input-bg);
+            border: 1px dashed #444;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .upload-placeholder {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-align: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .file-input { display: none; }
+
+        /* 토스트 알림 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 3000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>NAI 태그 보관함</h1>
+            <button class="add-btn" onclick="createNewPost()">+ 새 세트 추가</button>
+        </div>
+
+        <!-- 메인 피드 그리드 -->
+        <div id="feed-list" class="feed-grid"></div>
+    </div>
+
+    <!-- 내용 편집용 팝업 창 -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div id="modal-title" class="editable-title" contenteditable="true" oninput="onModalTextChange('title', this)"></div>
+                <button class="delete-btn" id="modal-delete-btn">삭제</button>
+                <button class="modal-close-btn" onclick="closeActiveModal()">×</button>
+            </div>
+            <div id="modal-body-content"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">복사 완료!</div>
+
+    <script>
+        let itemArray = [];
+        let currentActivePostId = null;
+
+        window.onload = function() {
+            const savedData = localStorage.getItem('nai_archive_data');
+            if (savedData) {
+                itemArray = JSON.parse(savedData);
+                renderFeed();
+            } else {
+                createNewPost();
+            }
+        };
+
+        function saveAllData() {
+            localStorage.setItem('nai_archive_data', JSON.stringify(itemArray));
+        }
+
+        function createNewPost() {
+            const newPost = {
+                id: Date.now(),
+                title: '',
+                test: '',
+                base: '',
+                nega: '',
+                img_boy_1: '',
+                img_boy_2: '',
+                img_girl_1: '',
+                img_girl_2: ''
+            };
+            itemArray.unshift(newPost);
+            saveAllData();
+            renderFeed();
+            openModal(newPost.id); // 생성 후 바로 편집 팝업 띄우기
+        }
+
+        function deletePost(id) {
+            if (confirm("이 태그 세트를 정말 삭제할까요?")) {
+                itemArray = itemArray.filter(item => item.id !== id);
+                saveAllData();
+                closeActiveModal();
+                renderFeed();
+            }
+        }
+
+        // 팝업 내부 실시간 텍스트 수정 반영
+        function onModalTextChange(field, element) {
+            if (!currentActivePostId) return;
+            const index = itemArray.findIndex(item => item.id === currentActivePostId);
+            if (index !== -1) {
+                itemArray[index][field] = element.innerText;
+                saveAllData();
+                renderFeed(); // 메인 피드 실시간 업데이트
+            }
+        }
+
+        function triggerUpload(imgField) {
+            document.getElementById(`modal-input-${imgField}`).click();
+        }
+
+        function handleImageUpload(event, imgField) {
+            const file = event.target.files[0];
+            if (file && currentActivePostId) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const maxW = 400;
+                        const scale = maxW / img.width;
+                        canvas.width = maxW;
+                        canvas.height = img.height * scale;
+                        
+                        ctx.Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
         }
 
         .section-title {

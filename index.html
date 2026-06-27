@@ -53,7 +53,7 @@
             letter-spacing: -0.5px;
         }
 
-        /* 못생긴 초록색 제거, 모던한 화이트/블랙 버튼 */
+        /* 모던 미니멀 버튼 */
         .add-btn {
             background-color: var(--accent-color);
             color: #000000;
@@ -135,7 +135,7 @@
             backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
-            align-items: flex-end; /* 모바일에서 아래서 위로 올라오는 느낌 */
+            align-items: flex-end; 
             z-index: 2000;
         }
 
@@ -270,7 +270,7 @@
 
         .image-wrapper {
             position: relative;
-            aspect-ratio: 1 / 1; /* 깔끔한 일대일 매칭 */
+            aspect-ratio: 1 / 1; 
             background-color: var(--input-bg);
             border: 1px dashed var(--border-color);
             border-radius: 8px;
@@ -327,11 +327,9 @@
             <button class="add-btn" onclick="createNewPost()">+ 새 세트 추가</button>
         </div>
 
-        <!-- 인스타 감성 메인 피드 리스트 -->
         <div id="feed-list" class="feed-grid"></div>
     </div>
 
-    <!-- 내용 편집/보기용 레이어 팝업 모달 -->
     <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -341,7 +339,6 @@
             </div>
             
             <div id="modal-body-content">
-                <!-- 자바스크립트로 팝업 내부 내용 동적 제어 -->
                 <div class="section">
                     <div class="section-title">테스트</div>
                     <div class="prompt-container">
@@ -369,15 +366,15 @@
                 <div class="section">
                     <div class="section-title">boy 결과물</div>
                     <div class="image-grid">
-                        <div class="image-wrapper" onclick="triggerUpload('img-boy-1')">
-                            <div id="modal-placeholder-img-boy-1" class="upload-placeholder">터치하여 업로드</div>
-                            <img id="modal-view-img-boy-1" style="display:none;">
-                            <input type="file" id="modal-input-img-boy-1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img-boy-1')">
+                        <div class="image-wrapper" onclick="triggerUpload('img_boy_1')">
+                            <div id="modal-placeholder-img_boy_1" class="upload-placeholder">터치하여 업로드</div>
+                            <img id="modal-view-img_boy_1" style="display:none;">
+                            <input type="file" id="modal-input-img_boy_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_1')">
                         </div>
-                        <div class="image-wrapper" onclick="triggerUpload('img-boy-2')">
-                            <div id="modal-placeholder-img-boy-2" class="upload-placeholder">터치하여 업로드</div>
-                            <img id="modal-view-img-boy-2" style="display:none;">
-                            <input type="file" id="modal-input-img-boy-2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img-boy-2')">
+                        <div class="image-wrapper" onclick="triggerUpload('img_boy_2')">
+                            <div id="modal-placeholder-img_boy_2" class="upload-placeholder">터치하여 업로드</div>
+                            <img id="modal-view-img_boy_2" style="display:none;">
+                            <input type="file" id="modal-input-img_boy_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_2')">
                         </div>
                     </div>
                 </div>
@@ -385,15 +382,15 @@
                 <div class="section">
                     <div class="section-title">girl 결과물</div>
                     <div class="image-grid">
-                        <div class="image-wrapper" onclick="triggerUpload('img-girl-1')">
-                            <div id="modal-placeholder-img-girl-1" class="upload-placeholder">터치하여 업로드</div>
-                            <img id="modal-view-img-girl-1" style="display:none;">
-                            <input type="file" id="modal-input-img-girl-1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img-girl-1')">
+                        <div class="image-wrapper" onclick="triggerUpload('img_girl_1')">
+                            <div id="modal-placeholder-img_girl_1" class="upload-placeholder">터치하여 업로드</div>
+                            <img id="modal-view-img_girl_1" style="display:none;">
+                            <input type="file" id="modal-input-img_girl_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_1')">
                         </div>
-                        <div class="image-wrapper" onclick="triggerUpload('img-girl-2')">
-                            <div id="modal-placeholder-img-girl-2" class="upload-placeholder">터치하여 업로드</div>
-                            <img id="modal-view-img-girl-2" style="display:none;">
-                            <input type="file" id="modal-input-img-girl-2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img-girl-2')">
+                        <div class="image-wrapper" onclick="triggerUpload('img_girl_2')">
+                            <div id="modal-placeholder-img_girl_2" class="upload-placeholder">터치하여 업로드</div>
+                            <img id="modal-view-img_girl_2" style="display:none;">
+                            <input type="file" id="modal-input-img_girl_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_2')">
                         </div>
                     </div>
                 </div>
@@ -407,7 +404,6 @@
         let itemArray = [];
         let currentActivePostId = null;
 
-        // 시작 시 데이터 로드
         window.onload = function() {
             const savedData = localStorage.getItem('nai_archive_data');
             if (savedData) {
@@ -420,7 +416,6 @@
             localStorage.setItem('nai_archive_data', JSON.stringify(itemArray));
         }
 
-        // 새 세트 추가 기능 완벽 구동
         function createNewPost() {
             const newPost = {
                 id: Date.now(),
@@ -439,25 +434,22 @@
             openModal(newPost.id);
         }
 
-        // 팝업 열기 및 데이터 매핑
         function openModal(id) {
             currentActivePostId = id;
             const item = itemArray.find(p => p.id === id);
             if (!item) return;
 
-            // 텍스트 로드
             document.getElementById('modal-title').innerText = item.title || '';
             document.getElementById('modal-prompt-test').innerText = item.test || '';
             document.getElementById('modal-prompt-base').innerText = item.base || '';
             document.getElementById('modal-prompt-nega').innerText = item.nega || '';
 
-            // 이미지 로드 매핑 처리
-            const imgFields = ['img-boy-1', 'img-boy-2', 'img-girl-1', 'img-girl-2'];
+            const imgFields = ['img_boy_1', 'img_boy_2', 'img_girl_1', 'img_girl_2'];
             imgFields.forEach(field => {
                 const imgTag = document.getElementById(`modal-view-${field}`);
                 const placeholder = document.getElementById(`modal-placeholder-${field}`);
-                if (item[field.replace(/-/g, '_')]) {
-                    imgTag.src = item[field.replace(/-/g, '_')];
+                if (item[field]) {
+                    imgTag.src = item[field];
                     imgTag.style.display = 'block';
                     placeholder.style.display = 'none';
                 } else {
@@ -467,7 +459,6 @@
                 }
             });
 
-            // 삭제 버튼 바인딩
             document.getElementById('modal-delete-btn').onclick = function() {
                 if (confirm("이 태그 세트를 정말 삭제할까요?")) {
                     itemArray = itemArray.filter(p => p.id !== id);
@@ -491,7 +482,6 @@
             }
         }
 
-        // 실시간 텍스트 동기화
         function onModalTextChange(field, element) {
             if (!currentActivePostId) return;
             const index = itemArray.findIndex(p => p.id === currentActivePostId);
@@ -506,7 +496,6 @@
             document.getElementById(`modal-input-${field}`).click();
         }
 
-        // 로컬 업로드 및 최적화 리사이징
         function handleImageUpload(event, field) {
             const file = event.target.files[0];
             if (file && currentActivePostId) {
@@ -522,4 +511,64 @@
                         canvas.width = maxW;
                         canvas.height = img.height * scale;
                         
-                        ctx.drawImage(img, 0, 0,Normally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        const index = itemArray.findIndex(p => p.id === currentActivePostId);
+                        if (index !== -1) {
+                            itemArray[index][field] = compressedDataUrl;
+                            saveAllData();
+                            renderFeed();
+                            
+                            const imgTag = document.getElementById(`modal-view-${field}`);
+                            const placeholder = document.getElementById(`modal-placeholder-${field}`);
+                            imgTag.src = compressedDataUrl;
+                            imgTag.style.display = 'block';
+                            placeholder.style.display = 'none';
+                        }
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function copyText(field) {
+            if (!currentActivePostId) return;
+            const item = itemArray.find(p => p.id === currentActivePostId);
+            if (item && item[field]) {
+                navigator.clipboard.writeText(item[field]).then(() => {
+                    const toast = document.getElementById('toast');
+                    toast.style.opacity = '1';
+                    toast.style.bottom = '50px';
+                    setTimeout(() => { 
+                        toast.style.opacity = '0'; 
+                        toast.style.bottom = '40px';
+                    }, 1200);
+                });
+            }
+        }
+
+        function renderFeed() {
+            const feedContainer = document.getElementById('feed-list');
+            feedContainer.innerHTML = '';
+
+            itemArray.forEach(item => {
+                const feedItem = document.createElement('div');
+                feedItem.className = 'feed-item';
+                feedItem.onclick = () => openModal(item.id);
+
+                // 대표 이미지는 등록된 순서대로 탐색 (boy1 -> boy2 -> girl1 -> girl2)
+                const coverImg = item.img_boy_1 || item.img_boy_2 || item.img_girl_1 || item.img_girl_2;
+                
+                feedItem.innerHTML = `
+                    <div class="feed-img-wrapper">
+                        ${coverImg ? `<img src="${coverImg}">` : `<div class="feed-no-img">NO IMAGE</div>`}
+                    </div>
+                    <div class="feed-title">${item.title || '제목 없음'}</div>
+                `;
+                feedContainer.appendChild(feedItem);
+            });
+        }
+    </script>
+</body>
+</html>

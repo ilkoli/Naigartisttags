@@ -142,7 +142,7 @@
             text-align: center;
         }
 
-        /* 고급스러운 모달 팝업 레이아웃 */
+        /* 모달 팝업 레이아웃 기본 (모바일 세로형) */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -155,13 +155,6 @@
             justify-content: center;
             align-items: flex-end; 
             z-index: 2000;
-        }
-
-        @media (min-width: 600px) {
-            .modal-overlay {
-                align-items: center;
-                padding: 20px;
-            }
         }
 
         .modal-content {
@@ -177,13 +170,6 @@
             position: relative;
         }
 
-        @media (min-width: 600px) {
-            .modal-content {
-                border-radius: 16px;
-                max-height: 90vh;
-            }
-        }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -191,6 +177,14 @@
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 15px;
+            gap: 10px;
+        }
+
+        .title-area {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
         }
 
         .editable-title {
@@ -198,11 +192,10 @@
             font-weight: 600;
             color: #ffffff;
             outline: none;
-            flex: 1;
-            margin-right: 15px;
+            border-bottom: 1px solid transparent;
         }
         .editable-title:empty:before {
-            content: "제목 없음 (터치하여 입력)";
+            content: "제목 없음";
             color: var(--text-muted);
         }
 
@@ -215,20 +208,69 @@
             line-height: 1;
         }
 
+        /* 삭제 버튼 위치 변경 및 모던화 */
         .delete-btn {
             background-color: transparent;
             color: var(--danger-color);
-            border: 1px solid var(--danger-color);
+            border: 1px solid rgba(255, 69, 58, 0.4);
             padding: 4px 10px;
             font-size: 0.75rem;
             border-radius: 12px;
             cursor: pointer;
-            margin-right: 10px;
             font-weight: 500;
+            white-space: nowrap;
+            transition: background-color 0.15s;
+        }
+        .delete-btn:hover {
+            background-color: rgba(255, 69, 58, 0.1);
+        }
+
+        /* 내부 본문 기본 레이아웃 (모바일은 1열 세로 정렬) */
+        .modal-body-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-left-pane, .modal-right-pane {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* PC 화면 대응 (태블릿 이상 가로 해상도) */
+        @media (min-width: 768px) {
+            .modal-overlay {
+                align-items: center;
+                padding: 20px;
+            }
+
+            .modal-content {
+                max-width: 850px; /* 가로 가로 분할용 와이드 매칭 */
+                border-radius: 16px;
+                max-height: 90vh;
+                padding: 25px;
+            }
+
+            .modal-body-layout {
+                flex-direction: row; /* 좌우 가로 배치 2분할 */
+                gap: 25px;
+            }
+
+            .modal-left-pane {
+                flex: 1.1; /* 텍스트 공간 조금 더 넓게 */
+            }
+
+            .modal-right-pane {
+                flex: 0.9;
+                max-height: calc(90vh - 110px);
+                overflow-y: auto; /* 이미지 스크롤 독립 제어 */
+                padding-right: 5px;
+            }
         }
 
         .section {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
         }
 
         .section-title {
@@ -240,7 +282,6 @@
             margin-bottom: 8px;
         }
 
-        /* 모던 프롬프트 입력창 */
         .prompt-container {
             position: relative;
             background-color: var(--input-bg);
@@ -279,7 +320,6 @@
             font-weight: 500;
         }
 
-        /* 정사각 배치 이미지 업로드 UI */
         .image-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -307,7 +347,6 @@
             left: 0;
         }
 
-        /* 6150.jpg 세팅 이미지용 전용 스타일 (잘림 방지 원본 비율 유지) */
         .setting-wrapper {
             position: relative;
             width: 100%;
@@ -339,7 +378,6 @@
 
         .file-input { display: none; }
 
-        /* 미니멀 토스트 팝업 */
         .toast {
             position: fixed;
             bottom: 40px;
@@ -380,77 +418,87 @@
     <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <div id="modal-title" class="editable-title" contenteditable="true" oninput="onModalTextChange('title', this)"></div>
-                <button class="delete-btn" id="modal-delete-btn">삭제</button>
+                <div class="title-area">
+                    <div id="modal-title" class="editable-title" contenteditable="true" oninput="onModalTextChange('title', this)"></div>
+                    <button class="delete-btn" id="modal-delete-btn">삭제</button>
+                </div>
                 <button class="modal-close-btn" onclick="closeActiveModal()">×</button>
             </div>
             
-            <div id="modal-body-content">
-                <div class="section">
-                    <div class="section-title">테스트</div>
-                    <div class="prompt-container">
-                        <button class="copy-btn" onclick="copyText('test')">복사</button>
-                        <div id="modal-prompt-test" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('test', this)"></div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">기본</div>
-                    <div class="prompt-container">
-                        <button class="copy-btn" onclick="copyText('base')">복사</button>
-                        <div id="modal-prompt-base" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('base', this)"></div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">네거</div>
-                    <div class="prompt-container">
-                        <button class="copy-btn" onclick="copyText('nega')">복사</button>
-                        <div id="modal-prompt-nega" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('nega', this)"></div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">boy 결과물</div>
-                    <div class="image-grid">
-                        <div class="image-wrapper" onclick="triggerUpload('img_boy_1')">
-                            <div id="modal-placeholder-img_boy_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
-                            <img id="modal-view-img_boy_1" style="display:none;">
-                            <input type="file" id="modal-input-img_boy_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_1')">
+            <!-- 반응형 구조를 위한 레이아웃 분할 노드 -->
+            <div class="modal-body-layout">
+                
+                <!-- PC 기준 왼쪽: 텍스트 뭉치들 -->
+                <div class="modal-left-pane">
+                    <div class="section">
+                        <div class="section-title">테스트</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText('test')">복사</button>
+                            <div id="modal-prompt-test" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('test', this)"></div>
                         </div>
-                        <div class="image-wrapper" onclick="triggerUpload('img_boy_2')">
-                            <div id="modal-placeholder-img_boy_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
-                            <img id="modal-view-img_boy_2" style="display:none;">
-                            <input type="file" id="modal-input-img_boy_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_2')">
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">기본</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText('base')">복사</button>
+                            <div id="modal-prompt-base" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('base', this)"></div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">네거</div>
+                        <div class="prompt-container">
+                            <button class="copy-btn" onclick="copyText('nega')">복사</button>
+                            <div id="modal-prompt-nega" class="editable-prompt" contenteditable="true" oninput="onModalTextChange('nega', this)"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="section">
-                    <div class="section-title">girl 결과물</div>
-                    <div class="image-grid">
-                        <div class="image-wrapper" onclick="triggerUpload('img_girl_1')">
-                            <div id="modal-placeholder-img_girl_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
-                            <img id="modal-view-img_girl_1" style="display:none;">
-                            <input type="file" id="modal-input-img_girl_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_1')">
+                <!-- PC 기준 오른쪽: 이미지 뭉치들 -->
+                <div class="modal-right-pane">
+                    <div class="section">
+                        <div class="section-title">boy 결과물</div>
+                        <div class="image-grid">
+                            <div class="image-wrapper" onclick="triggerUpload('img_boy_1')">
+                                <div id="modal-placeholder-img_boy_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
+                                <img id="modal-view-img_boy_1" style="display:none;">
+                                <input type="file" id="modal-input-img_boy_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_1')">
+                            </div>
+                            <div class="image-wrapper" onclick="triggerUpload('img_boy_2')">
+                                <div id="modal-placeholder-img_boy_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
+                                <img id="modal-view-img_boy_2" style="display:none;">
+                                <input type="file" id="modal-input-img_boy_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_2')">
+                            </div>
                         </div>
-                        <div class="image-wrapper" onclick="triggerUpload('img_girl_2')">
-                            <div id="modal-placeholder-img_girl_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
-                            <img id="modal-view-img_girl_2" style="display:none;">
-                            <input type="file" id="modal-input-img_girl_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_2')">
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">girl 결과물</div>
+                        <div class="image-grid">
+                            <div class="image-wrapper" onclick="triggerUpload('img_girl_1')">
+                                <div id="modal-placeholder-img_girl_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
+                                <img id="modal-view-img_girl_1" style="display:none;">
+                                <input type="file" id="modal-input-img_girl_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_1')">
+                            </div>
+                            <div class="image-wrapper" onclick="triggerUpload('img_girl_2')">
+                                <div id="modal-placeholder-img_girl_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
+                                <img id="modal-view-img_girl_2" style="display:none;">
+                                <input type="file" id="modal-input-img_girl_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_2')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <div class="section-title">setting</div>
+                        <div class="setting-wrapper" onclick="triggerUpload('img_setting')">
+                            <div id="modal-placeholder-img_setting" class="upload-placeholder">터치하여 세팅 스크린샷 업로드</div>
+                            <img id="modal-view-img_setting" style="display:none;">
+                            <input type="file" id="modal-input-img_setting" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_setting')">
                         </div>
                     </div>
                 </div>
 
-                <!-- 6150.jpg 세팅 원본 비율 전용 섹션 -->
-                <div class="section">
-                    <div class="section-title">setting</div>
-                    <div class="setting-wrapper" onclick="triggerUpload('img_setting')">
-                        <div id="modal-placeholder-img_setting" class="upload-placeholder">터치하여 세팅 스크린샷 업로드</div>
-                        <img id="modal-view-img_setting" style="display:none;">
-                        <input type="file" id="modal-input-img_setting" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_setting')">
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -565,7 +613,6 @@
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // 세팅 이미지는 글자가 식별되어야 하므로 최대폭 500px로 조금 더 여유있게 최적화
                         const maxW = 500;
                         const scale = maxW / img.width;
                         canvas.width = maxW;
@@ -611,7 +658,6 @@
                 feedItem.className = 'feed-item';
                 feedItem.onclick = () => openModal(item.id);
 
-                // 대표 이미지는 등록된 순서대로 탐색 (boy1 -> boy2 -> girl1 -> girl2 -> setting)
                 const coverImg = item.img_boy_1 || item.img_boy_2 || item.img_girl_1 || item.img_girl_2 || item.img_setting;
                 
                 feedItem.innerHTML = `

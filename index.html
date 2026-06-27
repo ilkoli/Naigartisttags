@@ -53,13 +53,32 @@
             letter-spacing: -0.5px;
         }
 
-        /* 모던 미니멀 버튼 */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* 미니멀 텍스트 링크 스타일 백업/복구 버튼 */
+        .text-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: color 0.15s;
+        }
+        .text-btn:hover {
+            color: var(--text-color);
+        }
+
         .add-btn {
             background-color: var(--accent-color);
             color: #000000;
             border: none;
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 7px 14px;
+            font-size: 0.82rem;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
@@ -324,12 +343,19 @@
     <div class="container">
         <div class="header">
             <h1>NAI 아카이브</h1>
-            <button class="add-btn" onclick="createNewPost()">+ 새 세트 추가</button>
+            <div class="header-controls">
+                <button class="text-btn" onclick="exportBackup()">백업</button>
+                <button class="text-btn" onclick="triggerImport()">복구</button>
+                <input type="file" id="import-file-input" style="display:none;" accept=".txt" onchange="importBackup(event)">
+                <button class="add-btn" onclick="createNewPost()">+ 새 세트</button>
+            </div>
         </div>
 
+        <!-- 인스타 감성 메인 피드 리스트 -->
         <div id="feed-list" class="feed-grid"></div>
     </div>
 
+    <!-- 내용 편집/보기용 레이어 팝업 모달 -->
     <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -537,13 +563,7 @@
             const item = itemArray.find(p => p.id === currentActivePostId);
             if (item && item[field]) {
                 navigator.clipboard.writeText(item[field]).then(() => {
-                    const toast = document.getElementById('toast');
-                    toast.style.opacity = '1';
-                    toast.style.bottom = '50px';
-                    setTimeout(() => { 
-                        toast.style.opacity = '0'; 
-                        toast.style.bottom = '40px';
-                    }, 1200);
+                    showToast("복사 완료");
                 });
             }
         }
@@ -557,7 +577,6 @@
                 feedItem.className = 'feed-item';
                 feedItem.onclick = () => openModal(item.id);
 
-                // 대표 이미지는 등록된 순서대로 탐색 (boy1 -> boy2 -> girl1 -> girl2)
                 const coverImg = item.img_boy_1 || item.img_boy_2 || item.img_girl_1 || item.img_girl_2;
                 
                 feedItem.innerHTML = `
@@ -568,6 +587,66 @@
                 `;
                 feedContainer.appendChild(feedItem);
             });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.style.opacity = '1';
+            toast.style.bottom = '50px';
+            setTimeout(() => { 
+                toast.style.opacity = '0'; 
+                toast.style.bottom = '40px';
+            }, 1200);
+        }
+
+        /* [텍스트 파일로 전체 백업 내보내기] */
+        function exportBackup() {
+            if (itemArray.length === 0) {
+                alert("백업할 데이터가 없습니다.");
+                return;
+            }
+            const dataStr = JSON.stringify(itemArray);
+            const blob = new Blob([dataStr], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `nai_archive_backup_${Date.now()}.txt`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast("백업 파일 다운로드 완료");
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file-input').click();
+        }
+
+        /* [백업 파일 불러와서 데이터 복구하기] */
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        if (confirm("백업 데이터를 가져올까요? 기존 브라우저에 있던 데이터는 덮어씌워집니다.")) {
+                            itemArray = importedData;
+                            saveAllData();
+                            renderFeed();
+                            showToast("복구 성공!");
+                        }
+                    } else {
+                        alert("올바르지 않은 백업 파일 형식입니다.");
+                    }
+                } catch (err) {
+                    alert("파일을 읽는 도중 오류가 발생했습니다.");
+                }
+                event.target.value = ''; // 파일 인풋 리셋
+            };
+            reader.readAsText(file);
         }
     </script>
 </body>

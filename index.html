@@ -59,7 +59,6 @@
             gap: 12px;
         }
 
-        /* 미니멀 텍스트 링크 스타일 백업/복구 버튼 */
         .text-btn {
             background: none;
             border: none;
@@ -308,12 +307,34 @@
             left: 0;
         }
 
+        /* 6150.jpg 세팅 이미지용 전용 스타일 (잘림 방지 원본 비율 유지) */
+        .setting-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 100px;
+            background-color: var(--input-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .setting-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
         .upload-placeholder {
             color: var(--text-muted);
             font-size: 0.75rem;
             text-align: center;
             pointer-events: none;
             z-index: 1;
+            padding: 40px 0;
         }
 
         .file-input { display: none; }
@@ -393,12 +414,12 @@
                     <div class="section-title">boy 결과물</div>
                     <div class="image-grid">
                         <div class="image-wrapper" onclick="triggerUpload('img_boy_1')">
-                            <div id="modal-placeholder-img_boy_1" class="upload-placeholder">터치하여 업로드</div>
+                            <div id="modal-placeholder-img_boy_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
                             <img id="modal-view-img_boy_1" style="display:none;">
                             <input type="file" id="modal-input-img_boy_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_1')">
                         </div>
                         <div class="image-wrapper" onclick="triggerUpload('img_boy_2')">
-                            <div id="modal-placeholder-img_boy_2" class="upload-placeholder">터치하여 업로드</div>
+                            <div id="modal-placeholder-img_boy_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
                             <img id="modal-view-img_boy_2" style="display:none;">
                             <input type="file" id="modal-input-img_boy_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_boy_2')">
                         </div>
@@ -409,15 +430,25 @@
                     <div class="section-title">girl 결과물</div>
                     <div class="image-grid">
                         <div class="image-wrapper" onclick="triggerUpload('img_girl_1')">
-                            <div id="modal-placeholder-img_girl_1" class="upload-placeholder">터치하여 업로드</div>
+                            <div id="modal-placeholder-img_girl_1" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
                             <img id="modal-view-img_girl_1" style="display:none;">
                             <input type="file" id="modal-input-img_girl_1" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_1')">
                         </div>
                         <div class="image-wrapper" onclick="triggerUpload('img_girl_2')">
-                            <div id="modal-placeholder-img_girl_2" class="upload-placeholder">터치하여 업로드</div>
+                            <div id="modal-placeholder-img_girl_2" class="upload-placeholder" style="padding:0;">터치하여 업로드</div>
                             <img id="modal-view-img_girl_2" style="display:none;">
                             <input type="file" id="modal-input-img_girl_2" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_girl_2')">
                         </div>
+                    </div>
+                </div>
+
+                <!-- 6150.jpg 세팅 원본 비율 전용 섹션 -->
+                <div class="section">
+                    <div class="section-title">setting</div>
+                    <div class="setting-wrapper" onclick="triggerUpload('img_setting')">
+                        <div id="modal-placeholder-img_setting" class="upload-placeholder">터치하여 세팅 스크린샷 업로드</div>
+                        <img id="modal-view-img_setting" style="display:none;">
+                        <input type="file" id="modal-input-img_setting" class="file-input" accept="image/*" onchange="handleImageUpload(event, 'img_setting')">
                     </div>
                 </div>
             </div>
@@ -452,7 +483,8 @@
                 img_boy_1: '',
                 img_boy_2: '',
                 img_girl_1: '',
-                img_girl_2: ''
+                img_girl_2: '',
+                img_setting: ''
             };
             itemArray.unshift(newPost);
             saveAllData();
@@ -470,18 +502,18 @@
             document.getElementById('modal-prompt-base').innerText = item.base || '';
             document.getElementById('modal-prompt-nega').innerText = item.nega || '';
 
-            const imgFields = ['img_boy_1', 'img_boy_2', 'img_girl_1', 'img_girl_2'];
+            const imgFields = ['img_boy_1', 'img_boy_2', 'img_girl_1', 'img_girl_2', 'img_setting'];
             imgFields.forEach(field => {
                 const imgTag = document.getElementById(`modal-view-${field}`);
                 const placeholder = document.getElementById(`modal-placeholder-${field}`);
                 if (item[field]) {
                     imgTag.src = item[field];
                     imgTag.style.display = 'block';
-                    placeholder.style.display = 'none';
+                    if(placeholder) placeholder.style.display = 'none';
                 } else {
                     imgTag.src = '';
                     imgTag.style.display = 'none';
-                    placeholder.style.display = 'block';
+                    if(placeholder) placeholder.style.display = 'block';
                 }
             });
 
@@ -532,13 +564,15 @@
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        const maxW = 400;
+                        
+                        // 세팅 이미지는 글자가 식별되어야 하므로 최대폭 500px로 조금 더 여유있게 최적화
+                        const maxW = 500;
                         const scale = maxW / img.width;
                         canvas.width = maxW;
                         canvas.height = img.height * scale;
                         
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
                         
                         const index = itemArray.findIndex(p => p.id === currentActivePostId);
                         if (index !== -1) {
@@ -550,7 +584,7 @@
                             const placeholder = document.getElementById(`modal-placeholder-${field}`);
                             imgTag.src = compressedDataUrl;
                             imgTag.style.display = 'block';
-                            placeholder.style.display = 'none';
+                            if(placeholder) placeholder.style.display = 'none';
                         }
                     };
                 };
@@ -577,7 +611,8 @@
                 feedItem.className = 'feed-item';
                 feedItem.onclick = () => openModal(item.id);
 
-                const coverImg = item.img_boy_1 || item.img_boy_2 || item.img_girl_1 || item.img_girl_2;
+                // 대표 이미지는 등록된 순서대로 탐색 (boy1 -> boy2 -> girl1 -> girl2 -> setting)
+                const coverImg = item.img_boy_1 || item.img_boy_2 || item.img_girl_1 || item.img_girl_2 || item.img_setting;
                 
                 feedItem.innerHTML = `
                     <div class="feed-img-wrapper">
@@ -600,7 +635,6 @@
             }, 1200);
         }
 
-        /* [텍스트 파일로 전체 백업 내보내기] */
         function exportBackup() {
             if (itemArray.length === 0) {
                 alert("백업할 데이터가 없습니다.");
@@ -622,7 +656,6 @@
             document.getElementById('import-file-input').click();
         }
 
-        /* [백업 파일 불러와서 데이터 복구하기] */
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -644,7 +677,7 @@
                 } catch (err) {
                     alert("파일을 읽는 도중 오류가 발생했습니다.");
                 }
-                event.target.value = ''; // 파일 인풋 리셋
+                event.target.value = '';
             };
             reader.readAsText(file);
         }

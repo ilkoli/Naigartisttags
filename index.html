@@ -14,6 +14,7 @@
             --accent-color: #ffffff;
             --danger-color: #ff453a;
             --border-color: #2c2c2e;
+            --grid-cols: 2; /* 자바스크립트로 동적 제어됨 */
         }
 
         * { 
@@ -34,7 +35,8 @@
 
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 1000px; /* 열 개수가 늘어날 때 대비해 컨테이너 최대 가로폭 확장 */
+            transition: max-width 0.3s;
         }
 
         /* 상단 모던 헤더 */
@@ -57,6 +59,23 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        /* 미니멀한 열 선택 드롭다운 디자인 */
+        .grid-select {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+        .grid-select:hover {
+            border-color: var(--text-muted);
         }
 
         .text-btn {
@@ -87,12 +106,13 @@
             opacity: 0.8;
         }
 
-        /* 인스타그램 스타일 피드 그리드 */
+        /* 유연하게 변하는 반응형 피드 그리드 */
         .feed-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(var(--grid-cols), 1fr);
             gap: 12px;
             width: 100%;
+            transition: grid-template-columns 0.3s;
         }
 
         .feed-item {
@@ -109,6 +129,7 @@
             transform: scale(0.98);
         }
 
+        /* 메인 피드 정방형 통일 완료 */
         .feed-img-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -117,6 +138,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            overflow: hidden;
         }
 
         .feed-img-wrapper img {
@@ -132,8 +154,8 @@
         }
 
         .feed-title {
-            padding: 12px 10px;
-            font-size: 0.85rem;
+            padding: 10px 8px;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--text-color);
             white-space: nowrap;
@@ -208,7 +230,6 @@
             line-height: 1;
         }
 
-        /* 삭제 버튼 위치 변경 및 모던화 */
         .delete-btn {
             background-color: transparent;
             color: var(--danger-color);
@@ -225,7 +246,7 @@
             background-color: rgba(255, 69, 58, 0.1);
         }
 
-        /* 내부 본문 기본 레이아웃 (모바일은 1열 세로 정렬) */
+        /* 내부 본문 레이아웃 */
         .modal-body-layout {
             display: flex;
             flex-direction: column;
@@ -246,25 +267,25 @@
             }
 
             .modal-content {
-                max-width: 850px; /* 가로 가로 분할용 와이드 매칭 */
+                max-width: 850px;
                 border-radius: 16px;
                 max-height: 90vh;
                 padding: 25px;
             }
 
             .modal-body-layout {
-                flex-direction: row; /* 좌우 가로 배치 2분할 */
+                flex-direction: row; 
                 gap: 25px;
             }
 
             .modal-left-pane {
-                flex: 1.1; /* 텍스트 공간 조금 더 넓게 */
+                flex: 1.1; 
             }
 
             .modal-right-pane {
                 flex: 0.9;
                 max-height: calc(90vh - 110px);
-                overflow-y: auto; /* 이미지 스크롤 독립 제어 */
+                overflow-y: auto; 
                 padding-right: 5px;
             }
         }
@@ -399,10 +420,22 @@
 </head>
 <body>
 
-    <div class="container">
+    <div class="container" id="main-container">
         <div class="header">
             <h1>NAI 아카이브</h1>
             <div class="header-controls">
+                <!-- 2열~10열 동적 세팅 조절창 -->
+                <select id="grid-select" class="grid-select" onchange="changeGridColumns(this.value)">
+                    <option value="2">2열 피드</option>
+                    <option value="3">3열 피드</option>
+                    <option value="4">4열 피드</option>
+                    <option value="5">5열 피드</option>
+                    <option value="6">6열 피드</option>
+                    <option value="7">7열 피드</option>
+                    <option value="8">8열 피드</option>
+                    <option value="9">9열 피드</option>
+                    <option value="10">10열 피드</option>
+                </select>
                 <button class="text-btn" onclick="exportBackup()">백업</button>
                 <button class="text-btn" onclick="triggerImport()">복구</button>
                 <input type="file" id="import-file-input" style="display:none;" accept=".txt" onchange="importBackup(event)">
@@ -510,12 +543,33 @@
         let currentActivePostId = null;
 
         window.onload = function() {
+            // 저장된 데이터 로드
             const savedData = localStorage.getItem('nai_archive_data');
             if (savedData) {
                 itemArray = JSON.parse(savedData);
             }
+
+            // 저장된 열 선택값 로드
+            const savedCols = localStorage.getItem('nai_grid_cols') || "2";
+            document.getElementById('grid-select').value = savedCols;
+            changeGridColumns(savedCols);
+
             renderFeed();
         };
+
+        // 열 너비 조절 기능
+        function changeGridColumns(value) {
+            document.documentElement.style.setProperty('--grid-cols', value);
+            localStorage.setItem('nai_grid_cols', value);
+
+            // 열이 4개 이상으로 많아지면 화면 레이아웃 폭을 넓혀서 가독성을 올림
+            const mainContainer = document.getElementById('main-container');
+            if (parseInt(value) >= 5) {
+                mainContainer.style.maxWidth = '95%';
+            } else {
+                mainContainer.style.maxWidth = '600px';
+            }
+        }
 
         function saveAllData() {
             localStorage.setItem('nai_archive_data', JSON.stringify(itemArray));
